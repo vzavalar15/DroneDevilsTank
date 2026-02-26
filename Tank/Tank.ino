@@ -40,7 +40,9 @@ else if(ch2Read<0 && ch1Read==0)
 {
   driveBackward();
 }
-
+else {//If variable is zero
+  stopDrive();
+}
 // Serial.print("Ch1: ");
 // Serial.print(ch1Read);
 // Serial.print(" | ");
@@ -91,8 +93,6 @@ void driveForward()
   Serial.println(mapB);
 }
 
-
-
 void driveBackward()
 {
   int mapA = map(ch3Read,-100,100,0,255);
@@ -106,4 +106,12 @@ void driveBackward()
   digitalWrite(IN4,LOW);
 }
 
+void stopDrive(){
+  analogWrite(enPinA,0);
+  digitalWrite(IN1,HIGH);
+  digitalWrite(IN2,LOW);
 
+  analogWrite(enPinB,0);
+  digitalWrite(IN3,LOW);
+  digitalWrite(IN4,HIGH);
+}
