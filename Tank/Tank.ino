@@ -46,6 +46,12 @@ else if(ch2Read == 0 && ch1Read > 0){
 else if(ch2Read == 0 && ch1Read < 0){
   driveTurnLeft();//turns in place
 }
+else if(ch2Read>0 && ch1Read<0){
+  driveForwardRight();
+}
+else if(ch2Read>0 && ch1Read>0){
+  driveForwardLeft();
+}
 else {//If variable is zero
   driveStop();
 }
@@ -156,4 +162,51 @@ void driveTurnRight(){
   Serial.print(mapA);
   Serial.print(" ");
   Serial.println(mapB);
+}
+
+void driveForwardRight()
+{
+  int percentage = calculateMotorBias(ch1Read);
+  int mapA = map(ch3Read,-100,100,0,255);
+  analogWrite(enPinA,percentage * mapA);
+  digitalWrite(IN1,LOW);
+  digitalWrite(IN2,HIGH);
+
+  int mapB =  map(ch3Read,-100,100,0,255);
+  analogWrite(enPinB,mapB);
+  digitalWrite(IN3,LOW);
+  digitalWrite(IN4,HIGH);
+
+  Serial.print(mapA * percentage);
+  Serial.print(" ");
+  Serial.println(mapB);
+}
+
+void driveForwardLeft()
+{
+  int percentage = calculateMotorBias(ch1Read);
+  int mapA = map(ch3Read,-100,100,0,255);
+  analogWrite(enPinA,mapA);
+  digitalWrite(IN1,LOW);
+  digitalWrite(IN2,HIGH);
+
+  int mapB =  map(ch3Read,-100,100,0,255);
+  analogWrite(enPinB,mapB  * percentage);
+  digitalWrite(IN3,LOW);
+  digitalWrite(IN4,HIGH);
+
+  Serial.print(mapA * percentage);
+  Serial.print(" ");
+  Serial.println(mapB);
+}
+
+int calculateMotorBias(int ch){ //computes the percentage to make motor work at the gven percentage
+  int perc;
+  if(ch > 0){
+    perc = 1 - (ch/100);
+  }
+  else if (ch < 0){
+    perc = 1 - ((-1*ch)/100);
+  }
+  return perc;
 }
