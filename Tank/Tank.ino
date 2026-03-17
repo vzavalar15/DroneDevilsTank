@@ -110,10 +110,6 @@ void driveForward()
   analogWrite(enPinB,mapB);
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,HIGH);
-
-  Serial.print(mapA);
-  Serial.print(" ");
-  Serial.println(mapB);
 }
 
 //This state makes the tank move backwards
@@ -129,9 +125,6 @@ void driveBackward()
   digitalWrite(IN3,HIGH);
   digitalWrite(IN4,LOW);
 
-  Serial.print(mapA);
-  Serial.print(" ");
-  Serial.println(mapB);
 }
 
 //This state makes the tank stop moving
@@ -157,9 +150,6 @@ void driveTurnLeft(){
   digitalWrite(IN3,HIGH);
   digitalWrite(IN4,LOW);
 
-  Serial.print(mapA);
-  Serial.print(" ");
-  Serial.println(mapB);
 }
 
 //This state makes the tank rotate to the right staying in place
@@ -174,9 +164,6 @@ void driveTurnRight(){
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,HIGH);
 
-  Serial.print(mapA);
-  Serial.print(" ");
-  Serial.println(mapB);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,9 +173,15 @@ void driveTurnRight(){
 //This state makes the tank turn right while moving fowards
 void driveForwardRight()
 {
-  int percentage = calculateMotorBias(ch1Read);
+  // int percentage = calculateMotorBias(ch1Read);
+  double percentage = calculateMotorBiasOther();
+
   int mapA = map(ch3Read,-100,100,0,255);
-  analogWrite(enPinA,percentage * mapA);
+  mapA = mapA * percentage;
+  Serial.print("MapA: ");
+  Serial.println(mapA);
+
+  analogWrite(enPinA,mapA);
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,HIGH);
 
@@ -197,36 +190,36 @@ void driveForwardRight()
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,HIGH);
 
-  Serial.print(mapA * percentage);
-  Serial.print(" ");
-  Serial.println(mapB);
 }
 
 //This state makes the tank turn left while moving fowards
 void driveForwardLeft()
 {
-  int percentage = calculateMotorBias(ch1Read);
+  // int percentage = calculateMotorBias(ch1Read);
+  double percentage = calculateMotorBiasOther();
+
   int mapA = map(ch3Read,-100,100,0,255);
   analogWrite(enPinA,mapA);
   digitalWrite(IN1,LOW);
   digitalWrite(IN2,HIGH);
 
   int mapB =  map(ch3Read,-100,100,0,255);
-  analogWrite(enPinB,mapB  * percentage);
+  mapB = mapB * percentage;
+  analogWrite(enPinB,mapB);
   digitalWrite(IN3,LOW);
   digitalWrite(IN4,HIGH);
 
-  Serial.print(mapA * percentage);
-  Serial.print(" ");
-  Serial.println(mapB);
 }
 
 //This state makes the tank turn right while moving backwards
 void driveBackwardRight()
 {
-  int percentage = calculateMotorBias(ch1Read);
+  // int percentage = calculateMotorBias(ch1Read);
+  double percentage = calculateMotorBiasOther();
+
   int mapA = map(ch3Read,-100,100,0,255);
-  analogWrite(enPinA,mapA * percentage);
+  mapA = mapA * percentage;
+  analogWrite(enPinA,mapA);
   digitalWrite(IN1,HIGH);
   digitalWrite(IN2,LOW);
 
@@ -235,41 +228,65 @@ void driveBackwardRight()
   digitalWrite(IN3,HIGH);
   digitalWrite(IN4,LOW);
 
-  Serial.print(mapA);
-  Serial.print(" ");
-  Serial.println(mapB);
 }
 
 //This state makes the tank turn left while moving backwards
 void driveBackwardLeft()
 {
-  int percentage = calculateMotorBias(ch1Read);
+  // int percentage = calculateMotorBias(ch1Read);
+  Serial.print("sjsjsk:");
+  Serial.print(ch2Read);
+
+  double percentage = calculateMotorBiasOther();
   int mapA = map(ch3Read,-100,100,0,255);
   analogWrite(enPinA,mapA);
   digitalWrite(IN1,HIGH);
   digitalWrite(IN2,LOW);
 
   int mapB =  map(ch3Read,-100,100,0,255);
-  analogWrite(enPinB,mapB * percentage);
+  mapB = mapB * percentage;
+  analogWrite(enPinB,mapB);
   digitalWrite(IN3,HIGH);
   digitalWrite(IN4,LOW);
 
-  Serial.print(mapA);
-  Serial.print(" ");
-  Serial.println(mapB);
 }
 
 //This function creates a percentage the the motor should be according to how far the user turns the analog left or right.
 // If the analog is to the right 20% then the function will return 80%.
 //ch will always be between -100 and 100 so dividing it by 100 will turn it into a percentage.
 //subtracting 1 by that percentage will return what percentage the motor should be at.
-int calculateMotorBias(int ch){
-  int perc;
-  if(ch > 0){
-    perc = 1 - (ch/100);
-  }
-  else if (ch < 0){
-    perc = 1 - ((-1*ch)/100);
-  }
+double calculateMotorBias(int &ch){
+  double perc;
+  perc = abs(ch)/100.0;
   return perc;
+}
+
+
+//This function creates a percentage the the motor should be according 
+//But unlike calculateMotorBias() this function takes the verticle input into account.
+//
+double calculateMotorBiasOther(){
+   double xPerc = calculateMotorBias(ch1Read);
+   double yPerc = calculateMotorBias(ch2Read) * .8;
+
+  //  Serial.print(" X: ");
+  //  Serial.println(xPerc);
+  //  Serial.print(" Y: ");
+  //  Serial.println(yPerc);
+
+  Serial.print("Shit - ");
+  Serial.println(xPerc * yPerc);
+
+   return xPerc * yPerc;  
+}
+
+
+//This function calculates the distance between the center and where the stick is moved to
+double calculateDistance(int x, int y){
+  int denominator = sqrt(sq(100) + sq(100));
+  int hypotenuse = sqrt(sq(x)+sq(y));
+
+  double percHyp = hypotenuse/denominator;
+  return percHyp * 100;
+  
 }
